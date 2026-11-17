@@ -1,0 +1,39 @@
+{
+  "name": "@hroshi/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --watch src/api.ts",
+    "start": "node src/api.ts",
+    "worker": "node src/worker.ts",
+    "cli": "node --env-file-if-exists=../../.env src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@fastify/static": "10.1.10",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/manrope": "5.3.0",
+    "@hroshi/domain": "workspace:*",
+    "@hroshi/schema": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "@resvg/resvg-js": "2.6.2",
+    "croner": "11.0.0",
+    "exceljs": "4.4.0",
+    "fastify": "5.12.8",
+    "fastify-type-provider-zod": "7.0.0",
+    "jose": "6.2.17",
+    "pg": "8.23.1",
+    "satori": "0.63.2",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "prisma": "7.10.1"
+  }
+}

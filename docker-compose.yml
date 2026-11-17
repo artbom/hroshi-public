@@ -1,0 +1,79 @@
+name: hroshi
+
+# The API and the worker run the same image. Paths are overridable because `scripts/deploy-pi.sh`
+# runs compose from the Mac against the Pi's Docker, where bind mounts resolve on the Pi.
+x-app: &app
+  image: hroshi
+  build:
+    context: .
+    target: runtime
+  restart: unless-stopped
+  env_file: .env
+  volumes:
+    - ${SECRETS_DIR:-./secrets}:/app/secrets:ro
+    # Broker statements are read at runtime (reports, Binance reconciliation) and written by the IBKR sync.
+    - ${BROKERS_DIR:-./data/brokers}:/app/data/brokers
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hroshi
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hroshi}
+      POSTGRES_DB: hroshi
+    ports:
+      - '127.0.0.1:${DB_PORT:-5442}:5432'
+    volumes:
+      - db:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U hroshi']
+      interval: 5s
+      retries: 10
+
+  api:
+    <<: *app
+    command: ['sh', '-c', 'pnpm --filter @hroshi/server db:deploy && node apps/server/src/api.ts']
+    environment:
+      DATABASE_URL: postgresql://hroshi:${POSTGRES_PASSWORD:-hroshi}@db:5432/hroshi
+      HOST: 0.0.0.0
+    ports:
+      - '${API_PORT:-4300}:4300'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    <<: *app
+    command: ['node', 'apps/server/src/worker.ts']
+    environment:
+      DATABASE_URL: postgresql://hroshi:${POSTGRES_PASSWORD:-hroshi}@db:5432/hroshi
+    depends_on:
+      api:
+        condition: service_started
+
+  # Telegram chat: Claude Code with the owner's own subscription, talking to the api's MCP server.
+  # Sign in once: `docker exec -it hroshi-bot-1 claude auth login`; the login lives in the volume.
+  bot:
+    image: hroshi-bot
+    build:
+      context: .
+      target: bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://hroshi:${POSTGRES_PASSWORD:-hroshi}@db:5432/hroshi
+      CHAT_MCP_URL: http://api:4300/api/mcp
+      CLAUDE_CONFIG_DIR: /claude
+      DISABLE_AUTOUPDATER: '1'
+    volumes:
+      - claude:/claude
+      # The whisper model for voice notes; the deploy downloads it once, outside the image.
+      - ${MODELS_DIR:-./data/models}:/app/data/models:ro
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  db:
+  claude:

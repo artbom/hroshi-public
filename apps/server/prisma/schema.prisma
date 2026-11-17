@@ -1,0 +1,325 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Currency {
+  UAH
+  EUR
+  USD
+  USDT
+  GBP
+}
+
+/// credit: a negative balance is card debt. receivable: positive = someone owes me, negative = I owe.
+enum AccountKind {
+  everyday
+  credit
+  cash
+  investment
+  receivable
+}
+
+/// amount is always positive, the type gives the sign; only valuation amounts are signed.
+enum TransactionType {
+  expense
+  income
+  transfer
+  valuation
+}
+
+/// What an income row in this category means for analytics.
+enum IncomeRole {
+  earning
+  refund
+  netting
+  ignored
+}
+
+enum Source {
+  claude
+  page
+  mono
+  revolut
+  binance
+  ibkr
+  zenmoney
+  splitwise
+}
+
+enum SyncStatus {
+  running
+  ok
+  error
+}
+
+model Account {
+  id             String      @id
+  name           String
+  currency       Currency
+  kind           AccountKind @default(everyday)
+  bank           String?
+  /// Balance at openingDate, before any transaction dated on or after it.
+  openingBalance Decimal     @db.Decimal(20, 8)
+  openingDate    DateTime    @db.Date
+  creditLimit    Decimal?    @db.Decimal(20, 8)
+  order          Int
+  note           String?
+  archived       Boolean     @default(false)
+  /// Money only passes through (ФОП UAH); hidden while the balance is zero.
+  passThrough    Boolean     @default(false)
+  iban           String?     @unique
+  syncSource     Source?
+  syncAccountId  String?
+  /// Loans only: who owes, or is owed, the money.
+  counterparty   String?
+  /// Loans only: when the money is due back.
+  dueDate        DateTime?   @db.Date
+
+  outgoing        Transaction[]    @relation("outgoing")
+  incoming        Transaction[]    @relation("incoming")
+  rules           Rule[]           @relation("ruleAccount")
+  transferRules   Rule[]           @relation("ruleTransferTarget")
+  plannedPayments PlannedPayment[]
+
+  @@unique([syncSource, syncAccountId])
+}
+
+model Category {
+  name             String     @id
+  forExpense       Boolean
+  forIncome        Boolean
+  incomeRole       IncomeRole @default(netting)
+  countsAsSpending Boolean    @default(true)
+  monthlyLimitEur  Decimal?   @db.Decimal(12, 2)
+  order            Int
+  archived         Boolean    @default(false)
+  /// One level only: analytics roll a subcategory up into its parent.
+  parent           String?
+  parentRef        Category?  @relation("subcategories", fields: [parent], references: [name], onUpdate: Cascade, onDelete: SetNull)
+
+  children        Category[]       @relation("subcategories")
+  transactions    Transaction[]
+  rules           Rule[]
+  plannedPayments PlannedPayment[]
+}
+
+model Transaction {
+  id           String          @id @default(uuid(7))
+  type         TransactionType
+  date         DateTime        @db.Date
+  accountId    String
+  account      Account         @relation("outgoing", fields: [accountId], references: [id])
+  amount       Decimal         @db.Decimal(20, 8)
+  currency     Currency
+  toAccountId  String?
+  toAccount    Account?        @relation("incoming", fields: [toAccountId], references: [id])
+  /// Missing: same as amount. Zero: unknown, no effect on the target balance.
+  toAmount     Decimal?        @db.Decimal(20, 8)
+  toCurrency   Currency?
+  category     String?
+  categoryRef  Category?       @relation(fields: [category], references: [name], onUpdate: Cascade)
+  note         String?
+  tags         String[]        @default([])
+  source       Source
+  /// Provider line of the outgoing leg (or the only leg), prefixed with the provider: "mono:<id>".
+  /// A hand-entered row keeps its own source when a bank line is linked to it.
+  externalId   String?         @unique
+  /// Provider line of the incoming leg of a transfer.
+  toExternalId String?         @unique
+  needsReview  Boolean         @default(false)
+  reviewReason String?
+  /// The owner parked this row in the review inbox until this day.
+  snoozedUntil DateTime?       @db.Date
+  /// A hand entry this bank line probably duplicates; the review inbox offers to merge them.
+  duplicateOfId String?
+  /// A part of a split row. The parent keeps the bank link (so sync still recognises the line)
+  /// and drops out of balances and analytics; its parts, which add up to it, count instead.
+  splitOfId    String?
+  splitOf      Transaction?    @relation("split", fields: [splitOfId], references: [id], onDelete: Cascade)
+  splits       Transaction[]   @relation("split")
+  raw          Json?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([date])
+  @@index([accountId, date])
+  @@index([toAccountId, date])
+  @@index([needsReview])
+  @@index([splitOfId])
+}
+
+/// Bank lines the owner deleted; sync must not bring them back.
+model DismissedLine {
+  externalId  String   @id
+  dismissedAt DateTime @default(now())
+}
+
+/// Categorises synced items. Lower priority runs first; the first match wins.
+model Rule {
+  id                  String    @id @default(uuid(7))
+  /// Case-insensitive substring of the merchant or description.
+  pattern             String?
+  mcc                 Int?
+  accountId           String?
+  account             Account?  @relation("ruleAccount", fields: [accountId], references: [id], onDelete: Cascade)
+  category            String?
+  categoryRef         Category? @relation(fields: [category], references: [name], onUpdate: Cascade)
+  /// Books a match as a transfer with this account instead of spending: money sent to it,
+  /// or money coming back from it.
+  transferToAccountId String?
+  transferToAccount   Account?  @relation("ruleTransferTarget", fields: [transferToAccountId], references: [id], onDelete: Cascade)
+  priority            Int       @default(100)
+  note                String?
+  createdAt           DateTime  @default(now())
+}
+
+model FxRate {
+  date     DateTime @db.Date
+  currency Currency
+  /// Units of currency per 1 EUR.
+  perEur   Decimal  @db.Decimal(20, 8)
+  source   String
+
+  @@id([date, currency])
+}
+
+/// Approximate yearly averages, used when no daily rate is near the date.
+model YearlyRate {
+  year     Int
+  currency Currency
+  perEur   Decimal  @db.Decimal(20, 8)
+
+  @@id([year, currency])
+}
+
+model SyncRun {
+  id         String     @id @default(uuid(7))
+  source     Source
+  startedAt  DateTime   @default(now())
+  finishedAt DateTime?
+  status     SyncStatus @default(running)
+  error      String?
+  fetched    Int        @default(0)
+  created    Int        @default(0)
+  updated    Int        @default(0)
+  /// Reconciliation findings, e.g. a computed balance that differs from the bank's.
+  warnings   String[]
+
+  @@index([source, startedAt])
+}
+
+/// Provider consent state. Long-lived secrets stay in env, never here.
+model Connection {
+  source     Source    @id
+  sessionId  String?
+  validUntil DateTime?
+  state      Json?
+  updatedAt  DateTime  @updatedAt
+}
+
+enum PlannedStatus {
+  confirmed
+  ignored
+}
+
+/// The owner's word on a detected recurring payment, keyed like the detection (the normalised payee).
+/// Confirmed ones carry his terms; ignored ones are not regular and stop being expected.
+model PlannedPayment {
+  key         String        @id
+  status      PlannedStatus
+  name        String?
+  amount      Decimal?      @db.Decimal(20, 8)
+  currency    Currency?
+  /// Day of the month it is due; a day past the month's end means its last day.
+  dayOfMonth  Int?
+  accountId   String?
+  account     Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category    String?
+  categoryRef Category?     @relation(fields: [category], references: [name], onUpdate: Cascade, onDelete: SetNull)
+  updatedAt   DateTime      @updatedAt
+}
+
+/// The owner's word on a payee, keyed by the normalised bank text: the name to show (payees that
+/// share a name merge) and what kind of counterparty it is when detection got it wrong.
+model PayeeAlias {
+  key       String   @id
+  name      String?
+  kind      String?
+  updatedAt DateTime @updatedAt
+}
+
+/// Daily closes of a benchmark fund, for the «same deposits in an index fund» comparison.
+model InstrumentPrice {
+  symbol   String
+  date     DateTime @db.Date
+  close    Decimal  @db.Decimal(20, 8)
+  currency Currency
+  source   String
+
+  @@id([symbol, date])
+}
+
+/// Target share of the portfolio per asset class, to show drift.
+model AllocationTarget {
+  assetClass String   @id
+  share      Decimal  @db.Decimal(6, 4)
+  updatedAt  DateTime @updatedAt
+}
+
+/// What the owner means to put aside each month; the month's spending budget is the usual income
+/// minus it. A single row: the goal in force.
+model SavingsGoal {
+  id        Int      @id @default(1)
+  amount    Decimal  @db.Decimal(12, 2)
+  currency  Currency
+  updatedAt DateTime @updatedAt
+}
+
+/// What one chat message changed, so the owner can undo it with one tap. Snapshots are whole rows
+/// (`to_jsonb`), so an undo restores bank links and raw lines exactly.
+model ChatChange {
+  id            String    @id @default(uuid(7))
+  /// Every row one chat message touched shares it.
+  batchId       String
+  /// One write inside the message; an undo walks the steps backwards.
+  stepId        String
+  transactionId String
+  /// Null when the step created the row.
+  before        Json?
+  /// Null when the step deleted the row.
+  after         Json?
+  createdAt     DateTime  @default(now())
+  undoneAt      DateTime?
+
+  @@index([batchId])
+}
+
+enum ChatSplitwiseAction {
+  created
+  deleted
+}
+
+/// A Splitwise expense the chat bot added or deleted. Splitwise lives outside the ledger, so the
+/// undo of a chat message replays these against its API next to the row snapshots of `ChatChange`.
+model ChatSplitwiseChange {
+  id        String              @id @default(uuid(7))
+  batchId   String
+  /// Splitwise ids outgrow a 32-bit integer.
+  expenseId String
+  action    ChatSplitwiseAction
+  /// What the owner reads under the reply: «Вечеря · 80 EUR».
+  summary   String
+  createdAt DateTime            @default(now())
+  undoneAt  DateTime?
+
+  @@index([batchId])
+}

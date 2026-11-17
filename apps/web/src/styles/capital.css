@@ -1,0 +1,97 @@
+/* Round 5: Аналітика → Капітал (bridge, FX), Платежі and Поїздки. */
+
+/* ——— Bridge: every line that has rows behind it reads as a link ——— */
+.bridge-link {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+.bridge-link::after {
+  content: ' →';
+}
+.bridge-link:hover {
+  border-bottom-style: solid;
+}
+.list details.row > summary .s {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: var(--muted);
+  padding-left: 1.1em;
+}
+
+/* ——— Trips side by side ——— */
+.trip-scroll {
+  margin-top: 8px;
+}
+.trip-scroll .tbl {
+  overflow: visible;
+}
+.trip-table table {
+  min-width: 0;
+}
+.trip-table tbody th[scope='row'] {
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--fg);
+  font-weight: 600;
+  min-width: 150px;
+}
+.trip-name {
+  color: inherit;
+  text-decoration: none;
+}
+.trip-name:hover {
+  color: var(--accent);
+}
+.trip-dates {
+  display: block;
+  font-weight: 400;
+  white-space: nowrap;
+}
+.trip-bar {
+  display: flex;
+  height: 5px;
+  margin-top: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.trip-bar i {
+  display: block;
+  height: 100%;
+}
+.trip-table td.num {
+  white-space: nowrap;
+}
+
+/* ——— Travel money no trip accounts for ——— */
+.trips-outside {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  margin-top: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+.trips-outside:hover {
+  border-color: var(--accent);
+}
+.trips-outside-sum {
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.trip-table thead th {
+  white-space: nowrap;
+}
+
+/* ——— Two tiles a row on a phone; an odd last one takes the whole row on purpose ——— */
+@media (max-width: 640px) {
+  .even-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .even-tiles > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}

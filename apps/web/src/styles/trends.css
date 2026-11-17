@@ -1,0 +1,353 @@
+/* Аналітика — one section per address, one clock (the period), wide tables that scroll with their names. */
+.trend-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.trend-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* On a phone the row scrolls edge to edge, so the last tab is visibly cut, not hidden. */
+  margin-inline: -16px;
+  padding-inline: 16px;
+}
+.trend-tabs::-webkit-scrollbar {
+  display: none;
+}
+.trend-tabs a {
+  flex: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--fg);
+  font-size: 14px;
+  padding: 6px 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.trend-tabs a:hover {
+  border-color: var(--accent);
+}
+.trend-tabs a[aria-current='page'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+  font-weight: 600;
+}
+.period-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+.period-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.period-select select {
+  font-size: 14px;
+  min-height: 34px;
+}
+.period-scope .fg {
+  color: var(--fg);
+}
+.period-bar .check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.period-bar .check label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* Wide tables: the names stay put, the newest figures sit next to them, a shade on the right says there is more. */
+.wide-table {
+  background:
+    linear-gradient(to left, var(--surface) 40%, transparent) right center / 36px 100% no-repeat local,
+    radial-gradient(farthest-side at 100% 50%, color-mix(in srgb, var(--fg) 24%, transparent), transparent) right center / 14px 100% no-repeat scroll,
+    var(--surface);
+}
+.wide-table th,
+.wide-table td {
+  white-space: nowrap;
+}
+.wide-table tbody th[scope='row'],
+.wide-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+  box-shadow: 1px 0 0 var(--line);
+}
+.wide-table thead th:first-child {
+  z-index: 2;
+}
+.wide-table .th-sub {
+  display: block;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.cmp-table table {
+  min-width: 720px;
+}
+.cmp-table td.warn {
+  color: var(--warn);
+}
+.cmp-table tr.total th,
+.cmp-table tr.total td {
+  font-weight: 700;
+}
+.wide-table tr.child th[scope='row'] {
+  padding-left: 30px;
+  font-weight: 400;
+}
+.fold-toggle {
+  all: unset;
+  display: inline-block;
+  width: 1.1em;
+  color: var(--muted);
+  cursor: pointer;
+}
+.fold-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  border-radius: 3px;
+}
+.heat th.l .fold-toggle {
+  float: left;
+  width: 14px;
+}
+.heat tr.child th.l button:not(.fold-toggle) {
+  padding-left: 14px;
+  color: var(--muted);
+}
+
+/* The legend stays on one line on a phone: each key keeps its words with its swatch. */
+.heat-legend {
+  gap: 4px 14px;
+  margin: 0 0 8px;
+}
+.heat-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.heat-key .heat-scale {
+  width: 56px;
+}
+
+/* «Звідки дохід»: a fixed amount column, so every bar track has the same length. */
+.cats.fixed-amount .cat {
+  grid-template-columns: minmax(0, 170px) minmax(0, 1fr) 5.5em;
+}
+.cats.fixed-amount .cat > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cats.fixed-amount .cat > .num {
+  text-align: right;
+}
+
+/* Capital bridge: every step is a link or opens into what it is made of. */
+.bridge {
+  margin-top: 14px;
+}
+.list details.row {
+  display: block;
+}
+.list details.row > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+.list details.row > summary::-webkit-details-marker {
+  display: none;
+}
+.list details.row > summary > span:first-child::before {
+  content: '▸';
+  display: inline-block;
+  width: 1.1em;
+  color: var(--muted);
+}
+.list details.row[open] > summary > span:first-child::before {
+  content: '▾';
+}
+.bridge-parts {
+  list-style: none;
+  margin: 8px 0 2px;
+  padding: 0 0 0 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.bridge-parts li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+}
+.bridge-parts .num {
+  white-space: nowrap;
+}
+.list .row .s a {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  /* Long names wrap, so «Записано · Очікується · Прогноз» fit beside them. */
+  .wide-table tbody th[scope='row'] {
+    white-space: normal;
+    min-width: 104px;
+    max-width: 124px;
+  }
+  .wide-table th,
+  .wide-table td {
+    padding-inline: 7px;
+  }
+  .cats.fixed-amount .cat {
+    grid-template-columns: minmax(0, 110px) minmax(0, 1fr) 4.8em;
+  }
+  .movers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .period-scope {
+    flex-basis: 100%;
+  }
+}
+
+/* ——— The one clock: ‹ range › and its length ——— */
+.period-clock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.period-clock .period-range {
+  min-width: 11em;
+  text-align: center;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.period-clock .btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ——— Category comparison: every column adds up; on a phone each row is a card ——— */
+.cmp-table tr.income th,
+.cmp-table tr.income td {
+  border-bottom: 2px solid var(--line);
+}
+.cmp-table tr.rest th {
+  font-weight: 400;
+}
+.cmp-cards {
+  display: none;
+}
+.cmp-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.cmp-card:last-child {
+  border-bottom: 0;
+}
+.cmp-card.total {
+  background: color-mix(in srgb, var(--fg) 4%, var(--surface));
+  border-radius: 10px 10px 0 0;
+}
+.cmp-card-name {
+  font-weight: 600;
+  min-width: 0;
+}
+.cmp-card-main {
+  text-align: right;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.cmp-card-delta {
+  text-align: right;
+  white-space: nowrap;
+}
+.cmp-card.income {
+  border-top: 2px solid var(--line);
+}
+@media (max-width: 640px) {
+  .cmp-table {
+    display: none;
+  }
+  .cmp-cards {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+}
+
+/* ——— Overview's category list ends with the sum of its rows ——— */
+.cmp.cmp-total {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+  padding-top: 8px;
+}
+
+/* ——— Movers: on two columns an odd count leads with one wide tile (the biggest move), like the net-worth tiles ——— */
+@media (max-width: 760px) {
+  .movers .bucket:first-child:nth-last-child(odd) {
+    grid-column: span 2;
+  }
+}
+
+/* ——— «По роках» scrolls inside ScrollTable: the table box grows with its columns ——— */
+.year-scroll {
+  margin-top: 4px;
+}
+.scroll-table.year-scroll .scroll-table-body > .tbl {
+  overflow: visible;
+  display: inline-block;
+  min-width: 100%;
+  vertical-align: top;
+  background: var(--surface);
+}
+@media (max-width: 640px) {
+  /* Room for «гортай →» above the table, and columns as narrow as their figures so two years show at once. */
+  .year-scroll {
+    margin-top: 20px;
+  }
+  .year-scroll .year-table table {
+    width: auto;
+    min-width: 100%;
+  }
+}
+.year-table tr.total th,
+.year-table tr.total td {
+  font-weight: 700;
+  border-bottom: 2px solid var(--line);
+}
+
+/* ——— The running month: one hatch on both bars, and the legend shows that hatch ——— */
+.legend i.sw-running {
+  background: repeating-linear-gradient(45deg, var(--muted) 0 2px, transparent 2px 4px);
+  box-shadow: inset 0 0 0 1px var(--muted);
+}
+
+/* ——— A tile title's ⓘ wraps with its last word ——— */
+.k-tail {
+  white-space: nowrap;
+}

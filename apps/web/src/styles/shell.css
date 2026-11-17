@@ -1,0 +1,421 @@
+/* Round 4: shell, Огляд and the trust strip. */
+
+/* ——— Header ——— */
+.theme-toggle {
+  padding: 6px 8px;
+}
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ——— Net worth headline: the delta never touches the € ——— */
+.headline-figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
+}
+.headline-delta {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ——— Month tiles: each figure is a link to its rows ——— */
+a.tile-value {
+  color: var(--fg);
+  text-decoration: none;
+  align-self: flex-start;
+}
+a.tile-value.pos {
+  color: var(--pos);
+}
+a.tile-value.neg {
+  color: var(--neg);
+}
+a.tile-value:hover,
+.tile .small a:hover {
+  text-decoration: underline;
+}
+.tile .small a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted currentColor;
+}
+.link-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-bottom: 1px dotted currentColor;
+}
+.link-button:hover {
+  color: var(--accent);
+}
+.scroll-target {
+  scroll-margin-top: 16px;
+}
+
+/* ——— Forecast: the action trails the amount, it never takes a row of its own ——— */
+.expected-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.expected-row .what a.plain:hover {
+  color: var(--accent);
+}
+.expected-row .side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.forecast-sum a {
+  color: inherit;
+  border-bottom: 1px dotted currentColor;
+  text-decoration: none;
+}
+.expected-add-icon {
+  display: none;
+}
+@media (max-width: 640px) {
+  .expected-row .side {
+    gap: 8px;
+  }
+  /* A 40 px «+» keeps the touch target and leaves the name its width. */
+  .expected-add {
+    min-width: 40px;
+    justify-content: center;
+    padding: 0;
+  }
+  .expected-add-icon {
+    display: inline;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .expected-add-text {
+    display: none;
+  }
+}
+
+/* ——— Trust: one line on Огляд, every chip on Синхронізація ——— */
+.trust-line {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 13px;
+}
+.trust-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.trust-source b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.trust-source.warn,
+.trust-source.bad {
+  color: var(--warn);
+}
+.trust-source:hover {
+  color: var(--accent);
+}
+.trust details.trust-fold summary {
+  color: var(--fg);
+}
+.trust-gist-head {
+  margin-right: 8px;
+  font-weight: 600;
+  color: var(--warn);
+}
+.trust-gist {
+  color: var(--fg);
+  font-weight: 400;
+}
+
+/* ——— Phone bar: Огляд · Операції · Аналітика · Інвестиції · Ще; «+» floats above it ——— */
+.fab {
+  display: none;
+}
+@media (max-width: 640px) {
+  .bottom-nav {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  header h1 {
+    font-size: 19px;
+  }
+  .fab {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    right: 16px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    z-index: 26;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--accent);
+    color: var(--surface);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+  }
+  .fab svg {
+    width: 26px;
+    height: 26px;
+  }
+  /* The last row of a list must not hide under the floating «+». */
+  .wrap:has(.fab) {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ——— «Ще» ——— */
+.more-group {
+  margin: 8px 2px 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* ——— Net worth tiles: an odd count leads with one wide tile, never ends with an orphan ——— */
+@media (max-width: 640px) {
+  .bucket-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bucket {
+    min-width: 0;
+  }
+  .bucket:first-child:nth-last-child(odd) {
+    grid-column: span 2;
+  }
+}
+
+/* ——— Chips that scroll sideways: the edge fades while more waits behind it ——— */
+@media (max-width: 640px) {
+  .scroll-row {
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    padding-right: 24px;
+  }
+  .scroll-row::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ——— Chart axes name their unit once, above the grid ——— */
+.chart {
+  margin-top: 22px;
+}
+.chart .axis-unit {
+  position: absolute;
+  left: 0;
+  top: -18px;
+  width: 40px;
+  text-align: right;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+svg.line-chart text.axis-unit {
+  font-size: 10px;
+}
+.legend .line-swatch {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+/* ——— One «nothing» per table ——— */
+.nothing {
+  color: var(--muted);
+  cursor: help;
+}
+
+/* ——— Wide tables on a phone: the first column stays, the edge fades, a hint says «гортай» ——— */
+.scroll-table {
+  position: relative;
+}
+.scroll-table-body {
+  overflow-x: auto;
+}
+.scroll-table.more .scroll-table-body {
+  mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+.scroll-table th:first-child,
+.scroll-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface);
+}
+.scroll-hint {
+  position: absolute;
+  right: 0;
+  top: -20px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ——— Day field: «дд.мм.рррр» and its own calendar ——— */
+.date-input {
+  position: relative;
+}
+.date-field {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+}
+.date-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.date-open {
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.date-open:hover {
+  color: var(--accent);
+}
+.date-input input[aria-invalid='true'] {
+  border-color: var(--warn);
+}
+.date-pop {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  width: 260px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.date-pop .mp-year b {
+  font-weight: 600;
+}
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.date-weekday {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 0 4px;
+}
+.date-grid button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  padding: 5px 0;
+  cursor: pointer;
+}
+.date-grid button:hover,
+.date-grid button:focus-visible {
+  border-color: var(--line);
+}
+.date-grid button.today {
+  border-color: var(--accent-soft);
+  font-weight: 700;
+}
+.date-grid button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--surface);
+}
+
+/* ——— Round 5: depth and navigation ——— */
+.acc,
+.tile,
+.card,
+.bucket {
+  box-shadow: var(--lift);
+}
+.tabs a svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+.tabs a:hover {
+  color: var(--fg);
+}
+.tabs a[aria-current='page'] svg {
+  color: var(--accent);
+}
+@media (max-width: 640px) {
+  .headline {
+    padding: 14px 16px;
+  }
+  .headline .big {
+    font-size: 34px;
+  }
+}
+
+/* ——— Ціль і бюджет: the money left leads, the goal is a setting under it ——— */
+.limit-bar {
+  position: relative;
+  overflow: visible;
+}
+.budget-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+.budget-left {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.budget-spent b {
+  color: var(--fg);
+}
+.budget-goal {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.budget-goal .limit-field {
+  display: grid;
+  grid-template-columns: auto 7rem auto auto;
+  justify-content: start;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  /* The label takes its own line, so the amount and its currency stay side by side. */
+  .budget-goal .limit-field {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .budget-goal .limit-field label {
+    grid-column: 1 / -1;
+  }
+  .budget-goal .limit-field input {
+    width: 100%;
+  }
+}

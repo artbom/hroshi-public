@@ -1,0 +1,313 @@
+/* Round 4: ledger screens — Операції, the record drawer, Рахунки and loans. */
+
+/* ——— Операції: month dividers in date order ——— */
+.op-table tr.month-divider td {
+  padding: 14px 10px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.op-table tr.month-divider:first-child td {
+  padding-top: 8px;
+}
+.cell-link.muted {
+  color: var(--muted);
+}
+
+/* ——— Drawer ——— */
+.drawer-remark {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.bank-check {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--warn);
+  border-radius: 8px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bank-check.explained {
+  border-left-color: var(--accent);
+}
+.bank-check .facts {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.bank-check .tx:last-child {
+  border-bottom: 0;
+}
+.bank-check .note {
+  margin: 0;
+}
+
+/* ——— Рахунки: totals that match Огляд ——— */
+.totals .total-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 4px;
+}
+
+/* ——— Account records with the balance after each row ——— */
+.records {
+  display: flex;
+  flex-direction: column;
+}
+.rec-head,
+.rec-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 140px 170px;
+  gap: 4px 14px;
+  align-items: start;
+}
+.rec-head {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--line);
+}
+.rec-head .r {
+  text-align: right;
+}
+.rec-month {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  padding: 14px 0 4px;
+  border-bottom: 1px solid var(--line);
+}
+.rec-row {
+  all: unset;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 140px 170px;
+  gap: 4px 14px;
+  align-items: start;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.rec-row:hover {
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+.rec-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.rec-date {
+  color: var(--muted);
+  font-size: 13px;
+  padding-top: 1px;
+}
+.rec-what {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.rec-what .t {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.rec-what .s {
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.rec-date-inline {
+  display: none;
+}
+.rec-delta {
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+.rec-bal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  white-space: nowrap;
+}
+.rec-src {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.rec-src.bank {
+  color: var(--accent);
+}
+.rec-alt {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ——— Loans ——— */
+.loan-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 10px;
+  margin-top: 10px;
+}
+.loan-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 140px;
+  min-width: 0;
+}
+.loan-form input {
+  width: 100%;
+  min-height: 34px;
+}
+.loan-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0 14px;
+}
+.loan-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4px 16px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.loan-row:last-child {
+  border-bottom: 0;
+}
+.loan-row:hover .loan-who b {
+  color: var(--accent);
+}
+.loan-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.loan-sum {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .rec-head {
+    display: none;
+  }
+  .rec-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'what delta'
+      'what bal';
+    gap: 2px 12px;
+  }
+  .rec-row .rec-date {
+    display: none;
+  }
+  .rec-date-inline {
+    display: inline;
+  }
+  .rec-row .rec-what {
+    grid-area: what;
+  }
+  .rec-row .rec-delta {
+    grid-area: delta;
+  }
+  .rec-row .rec-bal {
+    grid-area: bal;
+    font-size: 12px;
+  }
+  .rec-row .rec-bal .rec-src {
+    font-size: 9px;
+  }
+  .loan-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'who sum'
+      'due sum';
+  }
+  .loan-row .loan-who {
+    grid-area: who;
+  }
+  .loan-row .loan-due {
+    grid-area: due;
+  }
+  .loan-row .loan-sum {
+    grid-area: sum;
+  }
+}
+
+/* ——— Round 5 ——— */
+
+/* «звірено» and «оновлено» explain themselves on hover. */
+.term {
+  border-bottom: 1px dotted currentColor;
+  cursor: help;
+}
+
+/* The rates the euro total was converted at, on their own line under the equation. */
+.totals .total-rates {
+  flex-basis: 100%;
+}
+
+/* A bank figure that differs only because of the order of the day's holds says so under it. */
+.rec-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.rec-why {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* Every row of a chain in the drawer, the open one marked. */
+.chain-self {
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--accent);
+  padding-left: 8px;
+  margin-left: -11px;
+}
+.chain-self-mark {
+  align-self: flex-start;
+  order: -1;
+  margin-top: 6px;
+}
+
+/* Операції: the month scope above the filters. */
+.op-scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.op-scope-label {
+  min-width: 0;
+  white-space: nowrap;
+}

@@ -1,0 +1,176 @@
+/* Planned payments (Аналітика → Платежі) and quick add («Новий запис»). */
+
+.planned-tiles {
+  margin-bottom: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+}
+.planned-list {
+  display: flex;
+  flex-direction: column;
+}
+.planned-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 2px 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.planned-row:last-child {
+  border-bottom: 0;
+}
+.planned-row.late .planned-name {
+  color: var(--muted);
+}
+.planned-open {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.planned-open:hover .planned-name {
+  color: var(--accent);
+}
+.planned-open .s {
+  font-size: 12px;
+  color: var(--muted);
+}
+.planned-name .chip {
+  vertical-align: 1px;
+}
+.planned-amt {
+  text-align: right;
+  white-space: nowrap;
+}
+.planned-acts {
+  display: flex;
+  gap: 4px;
+  min-width: 64px;
+  justify-content: flex-end;
+}
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.icon-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.icon-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.planned-ignored {
+  margin-top: 10px;
+}
+.planned-ignored summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 6px 0;
+}
+
+.planned-sheet-sub {
+  grid-column: 1 / -1;
+}
+.planned-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.planned-facts p {
+  margin: 0;
+}
+.planned-form {
+  margin-top: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.planned-hint {
+  margin: 0;
+}
+
+/* Quick add */
+.qa-templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.qa-template {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  max-width: 100%;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.qa-template:hover {
+  border-color: var(--accent);
+}
+.qa-template .s {
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.qa-template b {
+  font-weight: 600;
+}
+.qa-form .qa-amount input {
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 8px 10px;
+}
+.qa-form .seg {
+  grid-column: 1 / -1;
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.qa-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  /* The sheet repeats when it was last paid; on a phone the row keeps to what is due. */
+  .planned-last {
+    display: none;
+  }
+}
+.planned-facts a {
+  color: var(--accent);
+}

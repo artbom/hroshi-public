@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Personal finance data and provider exports never go into git.
+data/
+secrets/
+
+apps/server/src/generated/

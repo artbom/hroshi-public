@@ -1,0 +1,113 @@
+/* ——— Source and bank marks: each brand's own logo, so a row's origin reads before its text ——— */
+.mark {
+  --mark-size: 20px;
+  width: var(--mark-size);
+  height: var(--mark-size);
+  border-radius: calc(var(--mark-size) * 0.3);
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  vertical-align: middle;
+  background: color-mix(in srgb, var(--muted) 22%, var(--surface));
+  color: var(--fg);
+  /* Black and dark brand tiles would vanish into the dark surface without an edge. */
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent);
+  font-family: var(--sans);
+  overflow: hidden;
+}
+/* App icons come square or with their own corner radius; the tile's radius clips them all alike. */
+.mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mark svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.mark.sm {
+  --mark-size: 16px;
+  vertical-align: -3px;
+}
+.mark.lg {
+  --mark-size: 30px;
+}
+.mark[data-brand='revolut'] {
+  background: #191c1f;
+  color: #fff;
+}
+.mark[data-brand='binance'] {
+  background: #181a20;
+  color: #f0b90b;
+}
+.mark[data-brand='claude'] {
+  background: #f5f2ea;
+  color: #d97757;
+}
+.mark[data-brand='page'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.mark[title] {
+  cursor: help;
+}
+
+/* A status dot pinned to a mark's corner: the source and whether it is healthy in one glyph. */
+.mark-status {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+.mark-status .dot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 0 0 2px var(--mark-ring, var(--bg));
+}
+
+/* A chip that names an origin carries its mark inside. */
+.chip.marked {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding-left: 2px;
+  vertical-align: 1px;
+}
+.chip.marked .mark {
+  --mark-size: 14px;
+}
+
+/* Rows that open the drawer lead with the account's bank. */
+.tx.has-mark {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 12px;
+}
+@media (max-width: 480px) {
+  /* A phone row needs its width for the payee and the amount. */
+  .tx.has-mark {
+    column-gap: 10px;
+  }
+  .tx.has-mark .mark.lg {
+    --mark-size: 26px;
+  }
+}
+.with-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.with-mark.tight {
+  gap: 6px;
+}
+.account-cell .with-mark {
+  display: inline-flex;
+  white-space: nowrap;
+}
+/* Chips sit on the surface, not the page, so the dot's ring takes the chip's colour. */
+.health .mark-status {
+  --mark-ring: var(--surface);
+}
